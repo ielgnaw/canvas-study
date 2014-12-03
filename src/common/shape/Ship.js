@@ -14,6 +14,7 @@ define(function (require) {
         this.height = opts.height || 20;
         this.angle = opts.angle || 0;
         this.showFlame = false;
+        this.type = opts.type || '';
     }
 
     Ship.prototype.update = function () {

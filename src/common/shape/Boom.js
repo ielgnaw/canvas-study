@@ -51,6 +51,9 @@ define(function (require) {
         if(this.alpha <= this.decay) {
             booms.splice(index, 1);
         }
+        if (booms.length === 0) {
+            exports.fire('explodeEnd');
+        }
     };
 
     Boom.prototype.draw = function (ctx) {
@@ -62,7 +65,8 @@ define(function (require) {
         ctx.stroke();
     };
 
-    return {
+
+    var exports = {
         createBooms: function (x, y) {
             var boomCount = 30;
             while (boomCount--) {
@@ -73,6 +77,10 @@ define(function (require) {
         getBooms: function () {
             return booms;
         }
-    }
+    };
+
+    require('common/observer').enable(exports);
+
+    return exports;
 
 });

@@ -202,7 +202,7 @@ define(function (require) {
     };
 
     /**
-     * 判断两个矩形是否橡胶
+     * 判断两个矩形是否相交
      *
      * @param {Object} rectA 矩形对象
      * @param {number} rectA.x 矩形顶点横坐标
@@ -329,6 +329,20 @@ define(function (require) {
         return Math.tan(angle * Math.PI / 180);
     };
 
+    /**
+     * 生成 guid
+     *
+     * @return {string} guid
+     */
+    util.createGuid = function () {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
+            /[xy]/g,
+            function (c) {
+                var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+                return v.toString(16);
+            }
+        );
+    };
     return util;
 
 });

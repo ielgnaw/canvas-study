@@ -18,6 +18,7 @@ define(function (require) {
             fillStyle: opts.fillStyle || '#666',
             lineWidth: opts.lineWidth || 1
         };
+        this.type = opts.type || '';
     }
 
     Circle.prototype.update = function () {

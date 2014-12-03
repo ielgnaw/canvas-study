@@ -8,6 +8,7 @@
 define(function (require) {
 
     var util = require('common/util');
+    var boom = require('common/shape/Boom');
 
     function Frame(canvas) {
         this.sprites = {};
@@ -33,16 +34,25 @@ define(function (require) {
             })(me)
         );
 
-        me.ctx.clearRect(0, 0, me.cWidth, me.cHeight);
+        // me.ctx.clearRect(0, 0, me.cWidth, me.cHeight);
 
-        // // 创建追踪效果
-        // // 设定 globalCompositeOperation 为 destination-out 可以在特定的不透明度来清除 canvas ，而不是完全擦拭
-        // me.ctx.globalCompositeOperation = 'destination-out';
-        // // 降低 alpha 属性可以创建更好的路径效果
-        // me.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        // me.ctx.fillRect( 0, 0, me.cWidth, me.cHeight);
-        // // lighter creates bright highlight points as the fireworks and particles overlap each other
-        // me.ctx.globalCompositeOperation = 'lighter';
+        // 创建追踪效果
+        // 设定 globalCompositeOperation 为 destination-out 可以在特定的不透明度来清除 canvas ，而不是完全擦拭
+        me.ctx.globalCompositeOperation = 'destination-out';
+        // 降低 alpha 属性可以创建更好的路径效果
+        me.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        me.ctx.fillRect(0, 0, me.cWidth, me.cHeight);
+        me.ctx.globalCompositeOperation = 'destination-over';
+
+        var booms = boom.getBooms();
+        var i = booms.length;
+        while (i--) {
+            if (me.stopFlag) {
+                me.removeAllSprite();
+            }
+            booms[i].draw(me.ctx);
+            booms[i].update(i);
+        }
 
         for (var i in me.sprites) {
             var sprite = me.sprites[i];
@@ -50,78 +60,55 @@ define(function (require) {
                 sprite.draw();
                 sprite.update();
 
-                var angle = sprite.angle;
-                if (angle) {
-                    me.ctx.strokeStyle = '#000';
-                    me.ctx.beginPath();
-                    me.ctx.moveTo(sprite.x, sprite.y); // 起点
-
-                    if (angle > 0 && angle < 90) {
-                        me.ctx.lineTo(
-                            sprite.x + util.getTanByAngle(90 - angle) * (me.cHeight - sprite.y),
-                            me.cHeight
-                        );
-                    }
-                    else if (angle > 90 && angle < 180) {
-                        me.ctx.lineTo(
-                            sprite.x - (me.cHeight - sprite.y) / util.getTanByAngle(180 - angle),
-                            me.cHeight
-                        );
-                    }
-                    else if (angle > 180 && angle < 270) {
-                        me.ctx.lineTo(
-                            sprite.x - (util.getTanByAngle(270 - angle) * sprite.y),
-                            0
-                        );
-                    }
-                    else if (angle > 270 && angle < 360) {
-                        me.ctx.lineTo(
-                            (sprite.x + (util.getTanByAngle(angle - 270) * sprite.y)),
-                            0
-                        );
-                    }
-                    else if (angle === 0 || angle === 360) {
-                        me.ctx.lineTo(
-                            me.cWidth,
-                            sprite.y
-                        );
-                    }
-                    else if (angle === 90) {
-                        me.ctx.lineTo(
-                            sprite.x,
-                            me.cHeight
-                        );
-                    }
-                    else if (angle === 180) {
-                        me.ctx.lineTo(
-                            0,
-                            sprite.y
-                        );
-                    }
-                    else if (angle === 270) {
-                        me.ctx.lineTo(
-                            sprite.x,
-                            0
-                        );
-                    }
-                    me.ctx.stroke();
+                if (sprite.x < 0 || sprite.x > me.cWidth
+                    || sprite.y < 0 || sprite.y > me.cHeight
+                ) {
+                    me.removeSprite(i);
                 }
-                // me.ctx.strokeStyle = '#000';
-                // me.ctx.beginPath();
-                // me.ctx.moveTo(400, 250); // 起点
-                // me.ctx.lineTo(sprite.x, sprite.y); // 终点
-                // me.ctx.stroke();
 
+                if (sprite.type === 'enemy') {
+                    if (Math.abs(sprite.x - sprite.endPoint.x) < sprite.radius
+                        && Math.abs(sprite.y - sprite.endPoint.y) < sprite.radius
+                    ) {
+                        me.stopFlag = true;
+                        break;
+                    }
+                }
+
+                if (sprite.type === 'bullet') {
+                    hitEnemy(me, sprite, i);
+                }
             }
         }
 
-        var booms = require('common/shape/Boom').getBooms();
-        var i = booms.length;
-        while (i--) {
-            booms[i].draw(me.ctx);
-            booms[i].update(i);
+        if (me.stopFlag) {
+            boom.on(
+                'explodeEnd',
+                function () {
+                    me.stop();
+                    me.ctx.font = '30pt Arial';
+                    me.ctx.fillStyle = 'green';
+                    me.ctx.strokeStyle = 'blue';
+                    me.ctx.fillText('你特么挂了，这么简单都挂，搞毛啊～', me.cWidth / 2 - 330, me.cHeight / 2);
+                    me.ctx.strokeText('你特么挂了，这么简单都挂，搞毛啊～', me.cWidth / 2 - 330, me.cHeight / 2);
+                }
+            );
         }
+    }
 
+    function hitEnemy(context, bullet, spriteName) {
+        var sprites = context.sprites;
+        for (var i in sprites) {
+            // debugger
+            if (sprites[i].type === 'enemy'
+                && Math.abs(bullet.x - sprites[i].x) < sprites[i].radius
+                && Math.abs(bullet.y - sprites[i].y) < sprites[i].radius
+            ) {
+                boom.createBooms(sprites[i].x, sprites[i].y);
+                context.removeSprite(i);
+                context.removeSprite(spriteName);
+            }
+        }
     }
 
     Frame.prototype.addSprite = function (name, sprite) {
