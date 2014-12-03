@@ -12,20 +12,22 @@ define(function (require) {
         this.y = opts.y || 0;
         this.width = opts.width || 25;
         this.height = opts.height || 20;
-        this.rotation = opts.rotation || 0;
+        this.angle = opts.angle || 0;
         this.showFlame = false;
     }
 
     Ship.prototype.update = function () {
 
-    }
+    };
 
     Ship.prototype.draw = function () {
         var me = this;
         var ctx = me.ctx;
         ctx.save();
         ctx.translate(me.x, me.y);
-        ctx.rotate(me.rotation);
+
+        // 弧度=角度*Math.PI/180
+        ctx.rotate(me.angle * Math.PI / 180);
 
         ctx.lineWidth = 1;
         ctx.strokeStyle = "#000";

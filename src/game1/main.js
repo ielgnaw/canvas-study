@@ -24,7 +24,7 @@ define(function (require) {
             y: cHeight / 2
         };
 
-        var enemys = require('./enemy').create(canvas, 3, 3, 3)
+        var enemys = require('./enemy').create(canvas, 1, 1, 1)
 
         for (var i = 0, len = enemys.length; i < len; i++) {
             var enemy = enemys[i];
@@ -55,7 +55,8 @@ define(function (require) {
             ctx: ctx,
             frame: frame,
             x: cWidth / 2,
-            y: cHeight / 2
+            y: cHeight / 2,
+            angle: 270
         });
 
         frame.addSprite('arrow', arrow);

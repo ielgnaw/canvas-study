@@ -7,6 +7,8 @@
 
 define(function (require) {
 
+    var util = require('common/util');
+
     function Frame(canvas) {
         this.sprites = {};
         this.canvas = canvas;
@@ -47,6 +49,69 @@ define(function (require) {
             if (sprite) {
                 sprite.draw();
                 sprite.update();
+
+                var angle = sprite.angle;
+                if (angle) {
+                    me.ctx.strokeStyle = '#000';
+                    me.ctx.beginPath();
+                    me.ctx.moveTo(sprite.x, sprite.y); // 起点
+
+                    if (angle > 0 && angle < 90) {
+                        me.ctx.lineTo(
+                            sprite.x + util.getTanByAngle(90 - angle) * (me.cHeight - sprite.y),
+                            me.cHeight
+                        );
+                    }
+                    else if (angle > 90 && angle < 180) {
+                        me.ctx.lineTo(
+                            sprite.x - (me.cHeight - sprite.y) / util.getTanByAngle(180 - angle),
+                            me.cHeight
+                        );
+                    }
+                    else if (angle > 180 && angle < 270) {
+                        me.ctx.lineTo(
+                            sprite.x - (util.getTanByAngle(270 - angle) * sprite.y),
+                            0
+                        );
+                    }
+                    else if (angle > 270 && angle < 360) {
+                        me.ctx.lineTo(
+                            (sprite.x + (util.getTanByAngle(angle - 270) * sprite.y)),
+                            0
+                        );
+                    }
+                    else if (angle === 0 || angle === 360) {
+                        me.ctx.lineTo(
+                            me.cWidth,
+                            sprite.y
+                        );
+                    }
+                    else if (angle === 90) {
+                        me.ctx.lineTo(
+                            sprite.x,
+                            me.cHeight
+                        );
+                    }
+                    else if (angle === 180) {
+                        me.ctx.lineTo(
+                            0,
+                            sprite.y
+                        );
+                    }
+                    else if (angle === 270) {
+                        me.ctx.lineTo(
+                            sprite.x,
+                            0
+                        );
+                    }
+                    me.ctx.stroke();
+                }
+                // me.ctx.strokeStyle = '#000';
+                // me.ctx.beginPath();
+                // me.ctx.moveTo(400, 250); // 起点
+                // me.ctx.lineTo(sprite.x, sprite.y); // 终点
+                // me.ctx.stroke();
+
             }
         }
 
@@ -56,7 +121,6 @@ define(function (require) {
             booms[i].draw(me.ctx);
             booms[i].update(i);
         }
-
 
     }
 

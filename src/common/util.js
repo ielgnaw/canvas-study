@@ -315,6 +315,20 @@ define(function (require) {
         return Math.random() * (max - min) + min;
     };
 
+    /**
+     * 根据角度获取 Math.tan 的值
+     * 正常的 Math.tan 的参数是弧度，
+     * 弧度 = 角度 * Math.PI / 180
+     * 角度 = 弧度 * 180 / Math.PI
+     *
+     * @param {number} angle 角度
+     *
+     * @return {number} Math.tan 结果
+     */
+    util.getTanByAngle = function (angle) {
+        return Math.tan(angle * Math.PI / 180);
+    };
+
     return util;
 
 });
